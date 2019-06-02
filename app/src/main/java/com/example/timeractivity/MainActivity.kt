@@ -1,17 +1,38 @@
 package com.example.timeractivity
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import com.example.timeractivity.util.PrefUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_timer.*
+import java.util.*
 
+//https://resocoder.com/2018/01/26/make-a-timer-app-notifications-ep-4-android-kotlin-tutorial-code/
 class MainActivity : AppCompatActivity() {
 
     enum class TimerState {
         Stopped, Paused, Running
 
+    }
+
+    companion object {
+        fun setAlarm(context: Context, nowSeconds: Long, secondsRemaining: Long): Long {
+            val wakeUpTime = (nowSeconds + secondsRemaining) * 1000
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val intent = Intent(context, TimerExpiredReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, wakeUpTime, pendingIntent)
+            PrefUtil.setAlarmSetTime(nowSeconds, context)
+            return wakeUpTime
+        }
+
+        val nowSeconds: Long
+            get() = Calendar.getInstance().timeInMillis / 1000
     }
 
     private lateinit var timer: CountDownTimer
@@ -36,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         if (timerState == TimerState.Running) {
             timer.cancel()
+            val wakeUpTime = setAlarm(this, nowSeconds, secondsRemaining)
         }
 
         PrefUtil.setPreviousTimerLengthSeconds(timerLengthSeconds, this)

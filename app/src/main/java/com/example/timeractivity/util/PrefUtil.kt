@@ -10,6 +10,7 @@ object PrefUtil {
     private const val SECONDS_REMAINING_ID = "com.example.timer.seconds_remaining"
     private const val TIMER_STATE_ID = "com.example.timer.timer_state"
     private const val PREVIOUS_TIMER_LENGTH_SECONDS_ID = "com.example.timer.previous_timer_length_seconds"
+    private const val ALARM_SET_TIME_ID = "com.example.timer.backgrounded_time"
 
     private fun getPreferences(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -50,6 +51,18 @@ object PrefUtil {
     fun setPreviousTimerLengthSeconds(seconds: Long, context: Context) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().also {
             it.putLong(PREVIOUS_TIMER_LENGTH_SECONDS_ID, seconds)
+            it.apply()
+        }
+    }
+
+    //alarm
+    fun getAlarmSetTime(context: Context): Long {
+        return getPreferences(context).getLong(ALARM_SET_TIME_ID, 0)
+    }
+
+    fun setAlarmSetTime(time: Long, context: Context) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().also {
+            it.putLong(ALARM_SET_TIME_ID, time)
             it.apply()
         }
     }
